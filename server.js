@@ -1,10 +1,11 @@
 const http = require('http')
 const express = require('express')
+const asyncnify = require('express-asyncify')
 
 const authmiddleware = require('./middleware/auth')
 const userRoute = require('./src/routes/user')
 
-const app = express()
+const app = asyncnify(express())
 const server = http.createServer(app)
 
 app.use(express.json())
