@@ -7,7 +7,9 @@
     "start": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "config": "file:../config",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
     "nodemon": "1.18.4"

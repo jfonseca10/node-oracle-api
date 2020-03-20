@@ -1,13 +1,16 @@
-const http = require("http");
-const express = require("express");
+const http = require('http')
+const express = require('express')
 
-const userRoute = require("./src/routes/user");
+const authmiddleware = require('./middleware/auth')
+const userRoute = require('./src/routes/user')
 
-const app = express();
-const server = http.createServer(app);
+const app = express()
+const server = http.createServer(app)
 
-app.use("/user", userRoute);
+app.use(express.json())
 
-server.listen("8080", () => {
-  console.log(`aplicacion en ejecucion puerto 8080`);
-});
+app.use('/user', userRoute)
+app.use(authmiddleware)
+server.listen('8080', () => {
+  console.log(`aplicacion en ejecucion puerto 8080`)
+})
