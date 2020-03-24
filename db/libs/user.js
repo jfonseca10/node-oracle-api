@@ -6,7 +6,12 @@ module.exports = function setupUser (UserModel) {
     )
   }
 
+  function findAllUser () {
+    return UserModel.findAll();
+  }
+
   return {
-    findUserByUserName
+    findUserByUserName,
+    findAllUser
   }
 }

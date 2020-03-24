@@ -54,6 +54,16 @@ api.post('/signin', async (req, res, next) => {
 
 })
 
+api.get('/listUser', async (req, res, next) => {
+  try {
+    let result
+    result = await User.findAllUser()
+    res.send(result)
+  }catch (e) {
+    return next(e)
+  }
+})
+
 // api.get('/list', (req, res) => {
 //   res.send(users)
 // })
