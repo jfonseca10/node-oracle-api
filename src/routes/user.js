@@ -53,20 +53,30 @@ api.post('/signin', async (req, res, next) => {
   }
 
 })
-
+api.use(authMiddleware)
 api.get('/listUser', async (req, res, next) => {
   try {
     let result
     result = await User.findAllUser()
     res.send(result)
-  }catch (e) {
+  } catch (e) {
     return next(e)
   }
 })
 
-// api.get('/list', (req, res) => {
-//   res.send(users)
-// })
+api.get('/list', (req, res, next) => {
+  //let result
+  try {
+    User.findAllUser().then(data => {
+      res.send(data)
+    }).catch(e => {
+      res.status(204).send(e)
+    })
+  } catch (e) {
+    next(e)
+  }
+})
+
 // api.post('/create', (req, res) => {
 //   const newUser = req.body
 //   console.log(newUser)
