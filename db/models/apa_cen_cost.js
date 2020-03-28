@@ -4,7 +4,7 @@ const setupDataBase = require('../libs/conexion')
 module.exports = function setupCentroCostosModel (config) {
   const sequelize = setupDataBase(config)
   return sequelize.define('centroCostos', {
-      id_cen_costo: {
+      idCenCosto: {
         field: 'CEN_COSTO',
         primaryKey: true,
         type: Sequelize.STRING,
