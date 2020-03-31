@@ -31,7 +31,7 @@ api.get('/solicitudesList', async (req, res, next) => {
   } catch (e) {
     return next(e)
   }
-})
+} )
 
 api.get('/detalleBySolicitudes', async (req, res, next) => {
   const { solicitudBodegaNum, codigoBodega } = req.query

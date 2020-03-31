@@ -1,4 +1,5 @@
 const http = require('http')
+const cors = require('cors')
 const express = require('express')
 const asyncnify = require('express-asyncify')
 
@@ -12,6 +13,7 @@ const solicitudesRoute = require('./src/routes/solicitudes')
 const app = asyncnify(express())
 const server = http.createServer(app)
 
+app.use(cors())
 app.use(express.json())
 
 app.use('/user', userRoute)

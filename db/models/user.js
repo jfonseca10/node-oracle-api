@@ -15,20 +15,20 @@ module.exports = function setupUserModel (config) {
       type: Sequelize.STRING,
       allowNull: false
     },
-    lastName: {
-      field: 'LAST_NAME',
+    email: {
+      field: 'EMAIL',
       type: Sequelize.STRING,
-      allowNull: true
+      allowNull: false
     },
     username: {
       field: 'USERNAME',
       type: Sequelize.STRING,
-      allowNull: true
+      allowNull: false
     },
     password: {
       field: 'PASSWORD',
       type: Sequelize.STRING,
-      allowNull: true
+      allowNull: false
     },
   }, {
     tableName: 'DEV_USER',

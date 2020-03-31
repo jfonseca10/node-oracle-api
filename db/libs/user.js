@@ -1,3 +1,7 @@
+const { v1 } = require('uuid')
+const bcrypt = require('bcrypt')
+const { api } = require('config')
+
 module.exports = function setupUser (UserModel) {
   function findUserByUserName (username) {
     return UserModel.findOne({
@@ -11,7 +15,24 @@ module.exports = function setupUser (UserModel) {
   }
 
   function create (model) {
-    return UserModel.create(model)
+    return new Promise(async (resolve, reject) => {
+      const { email, username, password } = model
+      let instanceModel = await UserModel.findOne({
+        where: { $or: [{ email }, { username }] }
+      })
+      if (instanceModel) {
+        reject({ message: 'el usuario ya existe' })
+      } else {
+        model.id = v1()
+        model.password = await bcrypt.hash(password, api.bsr)
+        UserModel.create(model).then(result => {
+          const { id, name, username, email } = result
+          resolve({ id, name, username, email })
+        })
+      }
+
+    })
+
   }
 
   function update (id, model) {

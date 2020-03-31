@@ -1,6 +1,7 @@
 const express = require('express')
 const asyncify = require('express-asyncify')
 const { sign } = require('../../libs/auth')
+const bcrypt = require('bcrypt')
 const authMiddleware = require('../../middleware/auth')
 const db = require('../../db')
 
@@ -26,14 +27,13 @@ api.post('/signin', async (req, res, next) => {
     try {
       result = await User.findUserByUserName(username)
       if (result) {
-        if (result.password === password) {
-          const { id, name, lastName } = result
-          const jsonToken = { id, name, lastName }
+        if (await bcrypt.compare(password, result.password)) {
+          const { id, name, email } = result
+          const jsonToken = { id, name, email }
           console.log(result)
           const data = {
             id,
             name,
-            lastName,
             username,
             token: sign(jsonToken)
           }
@@ -53,7 +53,7 @@ api.post('/signin', async (req, res, next) => {
   }
 
 })
-api.use(authMiddleware)
+//api.use(authMiddleware)
 api.get('/listUser', async (req, res, next) => {
   try {
     let result
@@ -77,11 +77,20 @@ api.get('/list', (req, res, next) => {
   }
 })
 
-// api.post('/create', (req, res) => {
-//   const newUser = req.body
-//   console.log(newUser)
-//   res.send(newUser)
-// })
+api.post('/create', async (req, res, next) => {
+  const newUser = req.body
+  let result
+  try {
+    result = await User.create(newUser).catch(e => {
+      res.status(406).send(e)
+    })
+    if (result) {
+      res.send(result)
+    }
+  } catch (e) {
+    return next(e)
+  }
+})
 // api.put('/update/:id', (req, res) => {
 //   const { id } = req.params
 //   const newData = req.body
