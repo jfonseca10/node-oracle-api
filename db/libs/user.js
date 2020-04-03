@@ -1,6 +1,8 @@
 const { v1 } = require('uuid')
 const bcrypt = require('bcrypt')
 const { api } = require('config')
+const nodemailer = require('nodemailer')
+require('dotenv').config()
 
 module.exports = function setupUser (UserModel) {
   function findUserByUserName (username) {
@@ -42,7 +44,7 @@ module.exports = function setupUser (UserModel) {
         where: { id }
       })
       if (instance) {
-        UserModel.update({ where: { id } }, model).then(resolve).catch(reject)
+        UserModel.update(model, { where: { id } }).then(resolve).catch(reject)
       } else {
         reject({ message: `user:${id} not found` })
       }
@@ -53,11 +55,59 @@ module.exports = function setupUser (UserModel) {
     return UserModel.deleted(id)
   }
 
+  function findUserEmail (email) {
+    return UserModel.findOne({
+      attributes: ['email', 'id'],
+      where: { email }
+    })
+  }
+
+  function findUserByRPC (resetPasswordCode) {
+    return UserModel.findOne({
+      attributes: ['email', 'id'],
+      where: { resetPasswordCode }
+    })
+  }
+
+  function sendMailResetPass (emailResult, link) {
+    const { email } = emailResult
+    console.log('link', link)
+    let transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD
+      }
+    })
+
+    let mailOptions = {
+      from: 'jose.emilio.fonseca.paz101010@gmail.com',
+      to: email,
+      subject: 'Reseteo clave Sistema Asistencia',
+      text: link
+    }
+
+    transporter.sendMail(mailOptions, function (err, data) {
+      if (err) {
+        console.log('Ocurrio un error')
+      } else {
+        console.log('Se envio el email')
+      }
+
+    })
+
+  }
+
+
+
   return {
     findUserByUserName,
     findAllUser,
     create,
     update,
-    deleted
+    deleted,
+    sendMailResetPass,
+    findUserEmail,
+    findUserByRPC
   }
 }

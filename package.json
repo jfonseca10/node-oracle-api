@@ -10,11 +10,15 @@
     "bcrypt": "^4.0.1",
     "config": "file:../config",
     "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-asyncify": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
+    "node-code-generator": "^1.0.3",
+    "nodemailer": "^6.4.6",
     "oracledb": "^4.2.0",
     "sequelize-oracle": "^3.3.2-0.0",
+    "touch-cli": "0.0.1",
     "uuid": "^7.0.2"
   },
   "devDependencies": {

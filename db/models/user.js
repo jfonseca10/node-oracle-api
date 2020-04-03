@@ -30,6 +30,11 @@ module.exports = function setupUserModel (config) {
       type: Sequelize.STRING,
       allowNull: false
     },
+    resetPasswordCode: {
+      field: 'RESET_PASSWORD_CODE',
+      type: Sequelize.STRING,
+      allowNull: true
+    }
   }, {
     tableName: 'DEV_USER',
     timestamps: false
