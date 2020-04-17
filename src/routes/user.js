@@ -6,9 +6,10 @@ const authMiddleware = require('../../middleware/auth')
 const db = require('../../db')
 const { v5 } = require('uuid')
 const config = require('config')
+const moment = require('moment')
 
 const api = asyncify(express.Router())
-let services, User
+let services, User, RegistroAsistencia, DatoEmpleado
 
 api.use('*', async (req, res, next) => {
   if (!services) {
@@ -18,27 +19,34 @@ api.use('*', async (req, res, next) => {
       next(e)
     }
     User = services.User
+    RegistroAsistencia = services.RegistroAsistencia
+    DatoEmpleado = services.VistaDatoEmpleado
   }
   next()
 })
 
 api.post('/signin', async (req, res, next) => {
-  const { username, password } = req.body
+  const { rol, password } = req.body
   let result
-  if (username && password) {
+  if (rol && password) {
     try {
-      result = await User.findUserByUserName(username)
+      result = await User.findUserByUserName(rol)
       if (result) {
         if (await bcrypt.compare(password, result.password)) {
           const { id, name, email } = result
           const jsonToken = { id, name, email }
-          console.log(result)
+          // const date = moment().subtract(5, 'hours').toDate()
           const data = {
             id,
             name,
-            username,
+            rol,
             token: sign(jsonToken)
           }
+          // const rolUsuario = {
+          //   rol: '42277',
+          //   fecha: date
+          // }
+          // registroAsistencia = await RegistroAsistencia.create(rolUsuario)
           res.send(data)
         } else {
           res.status(404).send('password incorrect')
@@ -55,6 +63,26 @@ api.post('/signin', async (req, res, next) => {
   }
 
 })
+
+api.get('/getDatoEmpleado', async (req, res, next) => {
+  const { rol } = req.query
+  let result
+  try {
+    result = await DatoEmpleado.findAllVistaDatoEmpleado(rol)
+    console.log('lo devuelto es :', result)
+    if (result != null) {
+      console.log('no es null')
+      res.send(result)
+    } else {
+      console.log('es nulo')
+      res.status(401).send('no hay datos')
+    }
+  } catch (e) {
+    return next(e)
+  }
+
+})
+
 api.post('/create', async (req, res, next) => {
   const newUser = req.body
   let result

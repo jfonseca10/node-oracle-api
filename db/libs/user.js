@@ -5,9 +5,9 @@ const nodemailer = require('nodemailer')
 require('dotenv').config()
 
 module.exports = function setupUser (UserModel) {
-  function findUserByUserName (username) {
+  function findUserByUserName (rol) {
     return UserModel.findOne({
-        where: { username },
+        where: { rol },
       }
     )
   }
@@ -18,9 +18,9 @@ module.exports = function setupUser (UserModel) {
 
   function create (model) {
     return new Promise(async (resolve, reject) => {
-      const { email, username, password } = model
+      const { email, rol, password } = model
       let instanceModel = await UserModel.findOne({
-        where: { $or: [{ email }, { username }] }
+        where: { $or: [{ email }, { rol }] }
       })
       if (instanceModel) {
         reject({ message: 'el usuario ya existe' })
@@ -28,8 +28,8 @@ module.exports = function setupUser (UserModel) {
         model.id = v1()
         model.password = await bcrypt.hash(password, api.bsr)
         UserModel.create(model).then(result => {
-          const { id, name, username, email } = result
-          resolve({ id, name, username, email })
+          const { id, name, rol, email } = result
+          resolve({ id, name, rol, email })
         })
       }
 

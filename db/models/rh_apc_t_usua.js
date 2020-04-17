@@ -5,38 +5,38 @@ module.exports = function setupUserModel (config) {
   const sequelize = setupDataBase(config)
   return sequelize.define('user', {
     id: {
-      field: 'ID',
+      field: 'USUA_ID',
       primaryKey: true,
       type: Sequelize.STRING,
       allowNull: false
     },
     name: {
-      field: 'NAME',
+      field: 'NOMB_COMP',
       type: Sequelize.STRING,
       allowNull: false
     },
     email: {
-      field: 'EMAIL',
+      field: 'EMAI_USUA',
       type: Sequelize.STRING,
       allowNull: false
     },
-    username: {
-      field: 'USERNAME',
+    rol: {
+      field: 'ROL',
       type: Sequelize.STRING,
       allowNull: false
     },
     password: {
-      field: 'PASSWORD',
+      field: 'PASS_USUA',
       type: Sequelize.STRING,
       allowNull: false
     },
     resetPasswordCode: {
-      field: 'RESET_PASSWORD_CODE',
+      field: 'RESE_PASS_CODE',
       type: Sequelize.STRING,
       allowNull: true
     }
   }, {
-    tableName: 'DEV_USER',
+    tableName: 'RH_APC_T_USUA',
     timestamps: false
   })
 
