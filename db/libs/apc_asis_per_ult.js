@@ -10,7 +10,7 @@ module.exports = function setupRegistroAsistencia (RegistroAsistenciaModel) {
       model.rolUsuario = rol
       model.fechaHora = moment().subtract(5, 'hours').toDate()
       model.tipoRegistro = 'E'
-      model.generado = 'I'
+      model.generado = 'T'
       RegistroAsistenciaModel.create(model).then(result => {
         const { rolUsuario, fechaHora, tipoRegistro, generado } = result
         resolve({ rolUsuario, fechaHora, tipoRegistro, generado })
@@ -26,7 +26,7 @@ module.exports = function setupRegistroAsistencia (RegistroAsistenciaModel) {
       model.rolUsuario = rol
       model.fechaHora = moment().subtract(5, 'hours').toDate()
       model.tipoRegistro = 'S'
-      model.generado = 'I'
+      model.generado = 'T'
       RegistroAsistenciaModel.create(model).then(result => {
         const { rolUsuario, fechaHora, tipoRegistro, generado } = result
         resolve({ rolUsuario, fechaHora, tipoRegistro, generado })

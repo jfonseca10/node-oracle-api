@@ -76,6 +76,7 @@ api.post('/createActividad', async (req, res, next) => {
 
 api.post('/createDetalleActividad', async (req, res, next) => {
   const newActividad = req.body
+  console.log('api', newActividad)
   let result
   try {
     result = await ActividadTele.crearDetalle(newActividad).catch(e => {
@@ -91,16 +92,32 @@ api.post('/createDetalleActividad', async (req, res, next) => {
 
 api.post('/updateDetalleActividad/:id', async (req, res, next) => {
   const model = req.body
-  const id = req.params
+  const { id } = req.params
   let result
   try {
     result = await ActividadTele.updateDetalle(id, model).catch(e => {
       res.status(406).send(e)
-      console.log('la respuesta es: ', e)
-      if (result) {
-        res.send(result)
-      }
     })
+    console.log('la respuesta es: ', result)
+    if (result) {
+      res.send(result)
+    }
+  } catch (e) {
+    return next(e)
+  }
+
+})
+
+api.post('/deleteDetalleActividad', async (req, res, next) => {
+  const { detalleId } = req.body
+  let result
+  try {
+    result = await ActividadTele.deleteDetaActividad(detalleId).then(result => {
+      res.send('ok')
+    })
+
+    console.log('eeee', result)
+
   } catch (e) {
     return next(e)
   }

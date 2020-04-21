@@ -1,5 +1,6 @@
 const { v1 } = require('uuid')
 const moment = require('moment')
+const { QueryTypes } = require('sequelize-oracle')
 module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActividadTeleModel) {
 
   function crearCabecera (model) {
@@ -25,17 +26,20 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
   function crearDetalle (model) {
     return new Promise(async (resolve, reject) => {
-      const { actividadId, descripcion, observacion, productoEntregable, fechaInicio, fechaFin, porcentajeAvance, referencia } = model
+      const {
+        actividadId, descripcionActividad, observacionActividad,
+        productoDigitalEntregable, fechaInicio, fechaFin, avancePorcentaje, referenciaActividad
+      } = model
       console.log('fecha', fechaInicio)
       model.detalleId = v1()
       model.actividadId = actividadId
       model.desdeDiaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
       model.hastaDiaSemana = moment(fechaFin).subtract(5, 'hours').toDate()
-      model.descripcionActividad = descripcion
-      model.productoDigitalEntregable = productoEntregable
-      model.avancePorcentaje = porcentajeAvance
-      model.observacionActividad = observacion
-      model.referenciaActividad = referencia
+      model.descripcionActividad = descripcionActividad
+      model.productoDigitalEntregable = productoDigitalEntregable
+      model.avancePorcentaje = avancePorcentaje
+      model.observacionActividad = observacionActividad
+      model.referenciaActividad = referenciaActividad
       model.aprobacionJefatura = ''
       model.fechaAprobacion = ''
       DetaActividadTeleModel.create(model).then(result => {
@@ -45,18 +49,21 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     })
   }
 
-  function updateDetalle (detall, model) {
-    console.log('update', detall)
-    console.log('update1', model)
+  function updateDetalle (detalleId, model) {
+    console.log(detalleId, model)
+    const { fechaInicio, fechaFin } = model
+
+    model.desdeDiaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
+    model.hastaDiaSemana = moment(fechaFin).subtract(5, 'hours').toDate()
+
+    console.log(model)
     //promesa para retornar codigo asincrono , consiste en 2 funciones : response, reject
     return new Promise(async (resolve, reject) => {
-      let instance = await DetaActividadTeleModel.findAll({
-        where: { detalleId: 'd8a5fdc0-801f-11ea-96aa-cf1a5859de9d' }
+      let instance = await DetaActividadTeleModel.findOne({
+        where: { detalleId }
       })
-
-      console.log('eee', instance)
       if (instance) {
-        DetaActividadTeleModel.update(model, { where: { detalleId: 'd8a5fdc0-801f-11ea-96aa-cf1a5859de9d' } }).then(resolve).catch(reject)
+        DetaActividadTeleModel.update(model, { where: { detalleId } }).then(resolve).catch(reject)
       } else {
         reject({ message: `user:${id} not found` })
       }
@@ -78,12 +85,37 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     })
   }
 
+  // function deleteDetaActividad (detalleId) {
+  //   console.log('delete lib', detalleId)
+  //   return new Promise(async (resolve, reject) => {
+  //     let instance = DetaActividadTeleModel.destroy({ where: { detalleId: detalleId } })
+  //     if (instance) {
+  //       console.log('ins', instance)
+  //     } else {
+  //       reject({ message: `user:${id} not found` })
+  //     }
+  //   })
+  //   console.log(instance, 'jjj')
+  // }
+
+  function deleteDetaActividad (detalleId) {
+    console.log('e', detalleId)
+    return new Promise(async (resolve, reject) => {
+      DetaActividadTeleModel.sequelize.query(`delete from RH_APC_T_DETA_ACTI_TELE where DETALLE_ID =  '${detalleId}' and ROWNUM = 1`, {
+        type: QueryTypes.SELECT,
+        plain: true
+      }).then(resolve).catch(reject)
+    })
+
+  }
+
   return {
     crearCabecera,
     crearDetalle,
     findAllCabActividades,
     findAllDetActividades,
-    updateDetalle
+    updateDetalle,
+    deleteDetaActividad
   }
 
 }

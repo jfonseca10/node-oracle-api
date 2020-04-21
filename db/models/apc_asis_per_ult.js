@@ -19,15 +19,25 @@ module.exports = function setupRegistroAsistenciaModel (config) {
     tipoRegistro: {
       field: 'TIPO_REGISTRO',
       type: Sequelize.STRING,
-      allowNull: true
+      allowNull: false
     },
     generado: {
       field: 'GENERADO',
       type: Sequelize.STRING,
       allowNull: true
+    },
+    usuario: {
+      field: 'USUARIO',
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+    fechaAudicion: {
+      field: 'FECHA_AUDI',
+      type: Sequelize.DATEONLY,
+      allowNull: true
     }
   }, {
-    tableName: 'APC_ASIS_PER_ULT',
+    tableName: 'APC_ASIS_PER',
     timestamps: false
   })
 
