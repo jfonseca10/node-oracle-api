@@ -81,9 +81,9 @@ module.exports = function setupUser (UserModel) {
     })
 
     let mailOptions = {
-      from: 'jose.emilio.fonseca.paz101010@gmail.com',
+      from: 'controlasistenciaseeq@gmail.com',
       to: email,
-      subject: 'Reseteo clave Sistema Asistencia',
+      subject: 'Reseteo clave Sistema Control de Asistencia',
       text: link
     }
 

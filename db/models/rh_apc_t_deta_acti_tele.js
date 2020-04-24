@@ -15,13 +15,8 @@ module.exports = function setupDetaActividadTeleModel (config) {
         type: Sequelize.STRING,
         allowNull: false
       },
-      desdeDiaSemana: {
-        field: 'DESD_DIA_SEMA',
-        type: Sequelize.DATEONLY,
-        allowNull: true
-      },
-      hastaDiaSemana: {
-        field: 'HAST_DIA_SEMA',
+      diaSemana: {
+        field: 'DIA_SEMA',
         type: Sequelize.DATEONLY,
         allowNull: true
       },
@@ -63,7 +58,6 @@ module.exports = function setupDetaActividadTeleModel (config) {
     }, {
       tableName: 'RH_APC_T_DETA_ACTI_TELE',
       timestamps: false
-
     }
   )
 

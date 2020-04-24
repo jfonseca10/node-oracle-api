@@ -32,6 +32,22 @@ api.get('/actividadesList', async (req, res, next) => {
   }
 })
 
+api.get('/actividadesListAutorizador', async (req, res, next) => {
+  const { rol } = req.query
+  let result
+  try {
+    result = await ActividadTele.findAllCabActiAutorizador(rol)
+
+    if (result && result.length > 0) {
+      res.send(result)
+    } else {
+      res.status(204).send('no hay datos')
+    }
+  } catch (e) {
+    return next(e)
+  }
+})
+
 api.get('/actividadesDetalleList', async (req, res, next) => {
   const { actividadId } = req.query
   let result
@@ -48,9 +64,25 @@ api.get('/actividadesDetalleList', async (req, res, next) => {
   }
 })
 
+api.get('/actiDetaListAutorizador', async (req, res, next) => {
+  const { actividadId } = req.query
+  let result
+  try {
+    result = await ActividadTele.findAllDetActividadesAutorizador(actividadId)
+    console.log('resultjjj', result)
+    if (result && result.length > 0) {
+      res.send(result)
+    } else {
+      res.status(204).send('no hay datos')
+    }
+  } catch (e) {
+    return next(e)
+  }
+})
+
 api.post('/createActividad', async (req, res, next) => {
   const Actividad = req.body
-  const { rol, fechaInicio, fechaFin } = Actividad
+  const { rol, name, fechaInicio, fechaFin } = Actividad
   let result
   let resultJefatura
   try {
@@ -58,6 +90,7 @@ api.post('/createActividad', async (req, res, next) => {
     const { rolJefatura } = resultJefatura
     const newActividad = {
       rol,
+      name,
       fechaInicio,
       fechaFin,
       rolJefatura
@@ -108,15 +141,28 @@ api.post('/updateDetalleActividad/:id', async (req, res, next) => {
 
 })
 
+api.post('/aprobacionAutorizador/:id', async (req, res, next) => {
+  const model = req.body
+  const { id } = req.params
+  let result
+  try {
+    result = await ActividadTele.updateDetalleAutorizador(id, model)
+    console.log('la respuesta es: ', result)
+    if (result) {
+      res.send(result)
+    }
+  } catch (e) {
+    return next(e)
+  }
+
+})
+
 api.post('/deleteDetalleActividad', async (req, res, next) => {
   const { detalleId } = req.body
   let result
   try {
-    result = await ActividadTele.deleteDetaActividad(detalleId).then(result => {
-      res.send('ok')
-    })
-
-    console.log('eeee', result)
+    result = await ActividadTele.deleteDetaActividad(detalleId)
+    res.send({ message: 'ok' })
 
   } catch (e) {
     return next(e)

@@ -80,8 +80,8 @@ api.get('/getDatoEmpleado', async (req, res, next) => {
   } catch (e) {
     return next(e)
   }
-
 })
+
 
 api.post('/create', async (req, res, next) => {
   const newUser = req.body
@@ -119,7 +119,7 @@ api.post('/verifyMail', async (req, res, next) => {
     if (emailResult) {
       const code = v5(`reset_${email}_${new Date()}`, v5.URL)
       await User.update(emailResult.id, { resetPasswordCode: code })
-      const link = `este es el link de reseteo http://localhost:4200/user/reset-password/${code}`
+      const link = `este es el link de reseteo https://nodejs.eeq.com.ec/user/reset-password/${code}`
       User.sendMailResetPass(emailResult, link)
       res.send({ message: 'ok' })
     } else {

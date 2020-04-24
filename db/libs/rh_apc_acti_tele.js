@@ -5,7 +5,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
   function crearCabecera (model) {
     return new Promise(async (resolve, reject) => {
-      const { rol, fechaInicio, fechaFin, rolJefatura } = model
+      const { rol, name, fechaInicio, fechaFin, rolJefatura } = model
       model.actividadId = v1()
       model.rolEmpleado = rol
       model.fechaInicio = moment(fechaInicio, 'DD/MM/YYYY').toDate()
@@ -13,9 +13,21 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       model.fechaCrea = moment().subtract(5, 'hours').toDate()
       model.estadoActividad = 'AC'
       model.rolAutorizador = rolJefatura
+      model.nombreCompleto = name
+      model.centroCosto = ''
       CabActividadTeleModel.create(model).then(result => {
-        const { actividadId, fechaInicio, fechaFin, rolJefatura } = result
-        resolve({ actividadId, fechaInicio, fechaFin, rolJefatura })
+        const { actividadId, fechaInicio, fechaFin, rolJefatura, fechaCrea, estadoActividad, rolAutorizador, nombreCompleto, centroCosto } = result
+        resolve({
+          actividadId,
+          fechaInicio,
+          fechaFin,
+          rolJefatura,
+          fechaCrea,
+          estadoActividad,
+          rolAutorizador,
+          nombreCompleto,
+          centroCosto
+        })
       }).catch(e => {
         reject({ message: 'el rango de fechas es maximo de 7 dias y no se puede ingresar un dia que ya exista en el rango' })
       })
@@ -25,16 +37,16 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   }
 
   function crearDetalle (model) {
+    console.log('ingrso a', model)
     return new Promise(async (resolve, reject) => {
       const {
         actividadId, descripcionActividad, observacionActividad,
-        productoDigitalEntregable, fechaInicio, fechaFin, avancePorcentaje, referenciaActividad
+        productoDigitalEntregable, fechaInicio, avancePorcentaje, referenciaActividad
       } = model
       console.log('fecha', fechaInicio)
       model.detalleId = v1()
       model.actividadId = actividadId
-      model.desdeDiaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
-      model.hastaDiaSemana = moment(fechaFin).subtract(5, 'hours').toDate()
+      model.diaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
       model.descripcionActividad = descripcionActividad
       model.productoDigitalEntregable = productoDigitalEntregable
       model.avancePorcentaje = avancePorcentaje
@@ -43,19 +55,15 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       model.aprobacionJefatura = ''
       model.fechaAprobacion = ''
       DetaActividadTeleModel.create(model).then(result => {
-        const { actividadId, descripcion, observacion, productoEntregable, fechaInicio, fechaFin, porcentajeAvance } = result
-        resolve({ actividadId, descripcion, observacion, productoEntregable, fechaInicio, fechaFin, porcentajeAvance })
+        const { actividadId, descripcion, observacion, productoEntregable, fechaInicio, porcentajeAvance } = result
+        resolve({ actividadId, descripcion, observacion, productoEntregable, fechaInicio, porcentajeAvance })
       })
     })
   }
 
   function updateDetalle (detalleId, model) {
-    console.log(detalleId, model)
-    const { fechaInicio, fechaFin } = model
-
-    model.desdeDiaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
-    model.hastaDiaSemana = moment(fechaFin).subtract(5, 'hours').toDate()
-
+    const { fechaInicio } = model
+    model.diaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
     console.log(model)
     //promesa para retornar codigo asincrono , consiste en 2 funciones : response, reject
     return new Promise(async (resolve, reject) => {
@@ -70,6 +78,38 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     })
   }
 
+  function updateDetalleAutorizador (detalleId, model) {
+    model.fechaAprobacion = moment().subtract(5, 'hours').toDate()
+    const { fechaAprobacion, aprobacionJefatura, actividadId } = model
+    //promesa para retornar codigo asincrono , consiste en 2 funciones : response, reject
+    return new Promise(async (resolve, reject) => {
+      let instance = await DetaActividadTeleModel.findOne({
+        where: { detalleId }
+      })
+      if (instance) {
+        DetaActividadTeleModel
+          .update({ aprobacionJefatura, fechaAprobacion }, {
+            where: { detalleId },
+            type: QueryTypes.RAW
+          })
+          .then(async () => {
+            const pentA = await DetaActividadTeleModel.count({ where: { actividadId, aprobacionJefatura: null } })
+            console.log('numero',pentA)
+            if (pentA === 0) {
+              CabActividadTeleModel.update({ estadoActividad: 'AP' }, { where: { actividadId } })
+                .then(() => {
+                  resolve({ success: true })
+                })
+            } else {
+              resolve({ success: true })
+            }
+          }).catch(reject)
+      } else {
+        reject({ message: `ok` })
+      }
+    })
+  }
+
   function findAllCabActividades (ROL_EMPL) {
     return CabActividadTeleModel.findAll({
       where: {
@@ -79,31 +119,38 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     })
   }
 
-  function findAllDetActividades (ACTIVIDAD_ID) {
-    return DetaActividadTeleModel.findAll({
-      where: { ACTIVIDAD_ID }
+  function findAllCabActiAutorizador (ROL_AUTO) {
+    return CabActividadTeleModel.findAll({
+      where: {
+        ROL_AUTO,
+        estadoActividad: 'AC'
+      }
     })
   }
 
-  // function deleteDetaActividad (detalleId) {
-  //   console.log('delete lib', detalleId)
-  //   return new Promise(async (resolve, reject) => {
-  //     let instance = DetaActividadTeleModel.destroy({ where: { detalleId: detalleId } })
-  //     if (instance) {
-  //       console.log('ins', instance)
-  //     } else {
-  //       reject({ message: `user:${id} not found` })
-  //     }
-  //   })
-  //   console.log(instance, 'jjj')
-  // }
+  function findAllDetActividades (actividadId) {
+    return DetaActividadTeleModel.findAll({
+      where: {
+        actividadId
+      }
+    })
+  }
+
+  function findAllDetActividadesAutorizador (actividadId) {
+    return DetaActividadTeleModel.findAll({
+      where: {
+        actividadId, aprobacionJefatura: null, fechaAprobacion:null
+      }
+    })
+  }
 
   function deleteDetaActividad (detalleId) {
     console.log('e', detalleId)
     return new Promise(async (resolve, reject) => {
-      DetaActividadTeleModel.sequelize.query(`delete from RH_APC_T_DETA_ACTI_TELE where DETALLE_ID =  '${detalleId}' and ROWNUM = 1`, {
-        type: QueryTypes.SELECT,
-        plain: true
+      DetaActividadTeleModel.sequelize.query(`delete from RH_APC_T_DETA_ACTI_TELE where DETALLE_ID =  '${detalleId}'`, {
+        type: QueryTypes.DELETE,
+        plain: true,
+        raw: true
       }).then(resolve).catch(reject)
     })
 
@@ -114,7 +161,10 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     crearDetalle,
     findAllCabActividades,
     findAllDetActividades,
+    findAllCabActiAutorizador,
+    findAllDetActividadesAutorizador,
     updateDetalle,
+    updateDetalleAutorizador,
     deleteDetaActividad
   }
 

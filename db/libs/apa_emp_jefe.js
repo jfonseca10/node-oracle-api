@@ -7,7 +7,15 @@ module.exports = function setupEmpleadoJefatura (EmpleadoJefaturaModel) {
     })
   }
 
+  function findEmpleadosByJefatura (ROL_EMP) {
+    return EmpleadoJefaturaModel.findAll({
+      attributes: ['rolEmpleado'],
+      where: { rolJefatura: ROL_EMP }
+    })
+  }
+
   return {
-    findJefaturaByEmpleado
+    findJefaturaByEmpleado,
+    findEmpleadosByJefatura
   }
 }

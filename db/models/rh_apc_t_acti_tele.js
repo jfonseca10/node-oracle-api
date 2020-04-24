@@ -39,6 +39,16 @@ module.exports = function setupCabActividadTeleModel (config) {
       field: 'ROL_AUTO',
       type: Sequelize.STRING,
       allowNull: true
+    },
+    centroCosto: {
+      field: 'CENT_COST',
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+    nombreCompleto: {
+      field: 'NOMB_COMP',
+      type: Sequelize.STRING,
+      allowNull: true
     }
   }, {
     tableName: 'RH_APC_T_ACTI_TELE',
