@@ -3,7 +3,7 @@ const asyncify = require('express-asyncify')
 const db = require('../../db')
 
 const api = asyncify(express.Router())
-let services, ActividadTele, EmpleadoJefatura
+let services, ActividadTele, EmpleadoJefatura, EmpleadoData
 api.use('*', async (req, res, next) => {
   if (!services) {
     try {
@@ -13,6 +13,7 @@ api.use('*', async (req, res, next) => {
     }
     ActividadTele = services.ActividadTele
     EmpleadoJefatura = services.EmpleadoJefatura
+    EmpleadoData = services.VistaDatoEmpleado
   }
   next()
 })
@@ -85,15 +86,20 @@ api.post('/createActividad', async (req, res, next) => {
   const { rol, name, fechaInicio, fechaFin } = Actividad
   let result
   let resultJefatura
+  let centroCosto
   try {
     resultJefatura = await EmpleadoJefatura.findJefaturaByEmpleado(rol)
     const { rolJefatura } = resultJefatura
+    centroCosto = await EmpleadoData.findCentroCostoByEmpleado(rol)
+    const { CENT_COST } = centroCosto
+    console.log('este es el costo', CENT_COST)
     const newActividad = {
       rol,
       name,
       fechaInicio,
       fechaFin,
-      rolJefatura
+      rolJefatura,
+      CENT_COST
     }
     result = await ActividadTele.crearCabecera(newActividad).catch(e => {
       console.log('api error', e)
@@ -151,6 +157,19 @@ api.post('/aprobacionAutorizador/:id', async (req, res, next) => {
     if (result) {
       res.send(result)
     }
+  } catch (e) {
+    return next(e)
+  }
+
+})
+
+api.post('/deleteActividad', async (req, res, next) => {
+  const { actividadId } = req.body
+  let result
+  try {
+    result = await ActividadTele.deleteActividad(actividadId)
+    res.send({ message: 'ok' })
+
   } catch (e) {
     return next(e)
   }

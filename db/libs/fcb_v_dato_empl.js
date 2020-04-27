@@ -8,7 +8,13 @@ module.exports = function setupVistaDatoEmpleado (VistaDatoEmpleadoModel) {
     })
   }
 
+  function findCentroCostoByEmpleado (rol) {
+    return VistaDatoEmpleadoModel.sequelize.query(`select CENT_COST from fcb_v_dato_empl where ROL_EMPL = '${rol}'`, {
+      type: QueryTypes.SELECT,
+      plain: true
+    })
 
+  }
 
   function findAllDatosSolicitantes (rol) {
     const rolnew = []
@@ -26,6 +32,7 @@ module.exports = function setupVistaDatoEmpleado (VistaDatoEmpleadoModel) {
 
   return {
     findAllVistaDatoEmpleado,
-    findAllDatosSolicitantes
+    findAllDatosSolicitantes,
+    findCentroCostoByEmpleado
   }
 }

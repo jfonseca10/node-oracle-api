@@ -49,6 +49,10 @@ module.exports = function setupCabActividadTeleModel (config) {
       field: 'NOMB_COMP',
       type: Sequelize.STRING,
       allowNull: true
+    },
+    mesAnio: {
+      field: 'MES_ANIO',
+      type: Sequelize.INTEGER
     }
   }, {
     tableName: 'RH_APC_T_ACTI_TELE',

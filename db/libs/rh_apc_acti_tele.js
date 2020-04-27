@@ -5,7 +5,10 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
   function crearCabecera (model) {
     return new Promise(async (resolve, reject) => {
-      const { rol, name, fechaInicio, fechaFin, rolJefatura } = model
+      const fechaAnio = moment().toDate().getFullYear()
+      const fechaMes = moment().add('1','month').toDate().getMonth()
+      const fechaMesAnio = fechaMes + '' + fechaAnio
+      const { rol, name, fechaInicio, fechaFin, rolJefatura, CENT_COST } = model
       model.actividadId = v1()
       model.rolEmpleado = rol
       model.fechaInicio = moment(fechaInicio, 'DD/MM/YYYY').toDate()
@@ -14,7 +17,8 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       model.estadoActividad = 'AC'
       model.rolAutorizador = rolJefatura
       model.nombreCompleto = name
-      model.centroCosto = ''
+      model.centroCosto = CENT_COST
+      model.mesAnio = fechaMesAnio
       CabActividadTeleModel.create(model).then(result => {
         const { actividadId, fechaInicio, fechaFin, rolJefatura, fechaCrea, estadoActividad, rolAutorizador, nombreCompleto, centroCosto } = result
         resolve({
@@ -94,7 +98,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
           })
           .then(async () => {
             const pentA = await DetaActividadTeleModel.count({ where: { actividadId, aprobacionJefatura: null } })
-            console.log('numero',pentA)
+            console.log('numero', pentA)
             if (pentA === 0) {
               CabActividadTeleModel.update({ estadoActividad: 'AP' }, { where: { actividadId } })
                 .then(() => {
@@ -139,9 +143,21 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   function findAllDetActividadesAutorizador (actividadId) {
     return DetaActividadTeleModel.findAll({
       where: {
-        actividadId, aprobacionJefatura: null, fechaAprobacion:null
+        actividadId, aprobacionJefatura: null, fechaAprobacion: null
       }
     })
+  }
+
+  function deleteActividad (detalleId) {
+    console.log('e', detalleId)
+    return new Promise(async (resolve, reject) => {
+      DetaActividadTeleModel.sequelize.query(`delete from RH_APC_T_ACTI_TELE where ACTIVIDAD_ID =  '${detalleId}'`, {
+        type: QueryTypes.DELETE,
+        plain: true,
+        raw: true
+      }).then(resolve).catch(reject)
+    })
+
   }
 
   function deleteDetaActividad (detalleId) {
@@ -165,6 +181,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     findAllDetActividadesAutorizador,
     updateDetalle,
     updateDetalleAutorizador,
+    deleteActividad,
     deleteDetaActividad
   }
 
