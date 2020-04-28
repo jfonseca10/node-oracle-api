@@ -12,16 +12,17 @@ if (params.prod && params.prod === 'true') {
   envProd = true
 }
 
-const authmiddleware = require('./middleware/auth')
+const vistaDatoEmpleado = require('./src/routes/vistaDatoEmpleado')
 const userRoute = require('./src/routes/user')
 const centroCostosRoute = require('./src/routes/centroCostos')
 const bodegasRoute = require('./src/routes/bodegas')
 const autorizadoresRoute = require('./src/routes/autorizadores')
 const solicitudesRoute = require('./src/routes/solicitudes')
+const authmiddleware = require('./middleware/auth')
 const regionRoute = require('./src/routes/region')
 const actividadesRoute = require('./src/routes/actividades')
 const registroAsistenciaRoute = require('./src/routes/registroAsistencia')
-const vistaDatoEmpleado = require('./src/routes/vistaDatoEmpleado')
+
 
 const app = asyncnify(express())
 let server
