@@ -1,6 +1,9 @@
 const express = require('express')
 const asyncify = require('express-asyncify')
 const db = require('../../db')
+const jsonToXml = require('json2xls')
+const fs = require('fs')
+const moment = require('moment')
 
 const api = asyncify(express.Router())
 let services, ActividadTele, EmpleadoJefatura, EmpleadoData
@@ -160,7 +163,51 @@ api.post('/aprobacionAutorizador/:id', async (req, res, next) => {
   } catch (e) {
     return next(e)
   }
+})
 
+api.post('/devolverActividadSemana/:id', async (req, res, next) => {
+  const model = req.body
+  const { id } = req.params
+  let result
+  try {
+    result = await ActividadTele.updateCabDevolverActi(id, model)
+    console.log('la respuesta es: ', result)
+    if (result) {
+      res.send(result)
+    }
+  } catch (e) {
+    return next(e)
+  }
+})
+
+api.post('/devolverActividadDiaria/:id', async (req, res, next) => {
+  const model = req.body
+  const { id } = req.params
+  let result
+  try {
+    result = await ActividadTele.updateDetaDevolverActi(id, model)
+    console.log('la respuesta es: ', result)
+    if (result) {
+      res.send(result)
+    }
+  } catch (e) {
+    return next(e)
+  }
+})
+
+api.post('/enviarSemanaAprobacion/:id', async (req, res, next) => {
+  const model = req.body
+
+  const { id } = req.params
+  let result
+  try {
+    result = await ActividadTele.updateCabEnviarSemana(id, model)
+    if (result) {
+      res.send(result)
+    }
+  } catch (e) {
+    return next(e)
+  }
 })
 
 api.post('/deleteActividad', async (req, res, next) => {
@@ -187,6 +234,46 @@ api.post('/deleteDetalleActividad', async (req, res, next) => {
     return next(e)
   }
 
+})
+
+api.get('/actividadesExport', async (req, res, next) => {
+  const { actividadId } = req.query
+  let result
+  try {
+    result = await ActividadTele.findAllDetActividades(actividadId)
+    console.log('resultjjj', result)
+    if (result && result.length > 0) {
+      const xlxsFile = jsonToXml(result)
+      const filename = `report${moment().format('YYYYMMDDHHmmss')}.xlsx`
+      const pathFile = fs.writeFileSync(`./temp/${filename}`, xlxsFile, 'binary')
+      console.log('devuelve', pathFile)
+      res.download(`./temp/${filename}`)
+    } else {
+      res.status(204).send('no hay datos')
+    }
+  } catch (e) {
+    return next(e)
+  }
+})
+
+api.get('/actividadesExportReport', async (req, res, next) => {
+  const { actividadId } = req.query
+  let result
+  try {
+    result = await ActividadTele.findAllActiDiariasBySemana(actividadId)
+    console.log('resultjjj', result)
+    if (result && result.length > 0) {
+      const xlxsFile = jsonToXml(result)
+      const filename = `report${moment().format('YYYYMMDDHHmmss')}.xlsx`
+      const pathFile = fs.writeFileSync(`./temp/${filename}`, xlxsFile, 'binary')
+      console.log('devuelve', pathFile)
+      res.download(`./temp/${filename}`)
+    } else {
+      res.status(204).send('no hay datos')
+    }
+  } catch (e) {
+    return next(e)
+  }
 })
 
 module.exports = api

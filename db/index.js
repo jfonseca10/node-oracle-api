@@ -52,6 +52,9 @@ module.exports = async function () {
   const CabActividadTeleModel = setupCabActividadTeleModel(config)
   const DetaActividadTeleModel = setupDetaActividadTeleModel(config)
   const EmpleadoJefaturaModel = setupEmpleadoJefaturaModel(config)
+
+  /* RELATIONS MODELS */
+  CabActividadTeleModel.hasMany(DetaActividadTeleModel, { foreignKey: 'ACTIVIDAD_ID', targetKey: 'ACTIVIDAD_ID' })
   /* CREATE LIBS*/
   const User = setupUser(UserModel)
   const CentroCostos = setupCentroCostos(CentroCostosModel)
@@ -62,7 +65,7 @@ module.exports = async function () {
   const Actividades = setupActividades(ActividadesModel)
   const VistaDatoEmpleado = setupVistaDatoEmpleado(VistaDatoEmpleadoModel)
   const RegistroAsistencia = setupRegistroAsistencia(RegistroAsistenciaModel)
-  const ActividadTele = setupCabActividadTele(CabActividadTeleModel, DetaActividadTeleModel)
+  const ActividadTele = setupCabActividadTele(CabActividadTeleModel, DetaActividadTeleModel, VistaDatoEmpleadoModel)
   const EmpleadoJefatura = setupEmpleadoJefatura(EmpleadoJefaturaModel)
   return {
     User,

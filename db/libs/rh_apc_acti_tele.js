@@ -1,12 +1,12 @@
 const { v1 } = require('uuid')
 const moment = require('moment')
 const { QueryTypes } = require('sequelize-oracle')
-module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActividadTeleModel) {
+module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActividadTeleModel, VistaDatoEmpleadoModel) {
 
   function crearCabecera (model) {
     return new Promise(async (resolve, reject) => {
       const fechaAnio = moment().toDate().getFullYear()
-      const fechaMes = moment().add('1','month').toDate().getMonth()
+      const fechaMes = moment().add('1', 'month').toDate().getMonth()
       const fechaMesAnio = fechaMes + '' + fechaAnio
       const { rol, name, fechaInicio, fechaFin, rolJefatura, CENT_COST } = model
       model.actividadId = v1()
@@ -41,13 +41,11 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   }
 
   function crearDetalle (model) {
-    console.log('ingrso a', model)
     return new Promise(async (resolve, reject) => {
       const {
         actividadId, descripcionActividad, observacionActividad,
         productoDigitalEntregable, fechaInicio, avancePorcentaje, referenciaActividad
       } = model
-      console.log('fecha', fechaInicio)
       model.detalleId = v1()
       model.actividadId = actividadId
       model.diaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
@@ -56,7 +54,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       model.avancePorcentaje = avancePorcentaje
       model.observacionActividad = observacionActividad
       model.referenciaActividad = referenciaActividad
-      model.aprobacionJefatura = ''
+      model.aprobacionJefatura = 'AC'
       model.fechaAprobacion = ''
       DetaActividadTeleModel.create(model).then(result => {
         const { actividadId, descripcion, observacion, productoEntregable, fechaInicio, porcentajeAvance } = result
@@ -68,6 +66,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   function updateDetalle (detalleId, model) {
     const { fechaInicio } = model
     model.diaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
+    model.aprobacionJefatura = 'AA'
     console.log(model)
     //promesa para retornar codigo asincrono , consiste en 2 funciones : response, reject
     return new Promise(async (resolve, reject) => {
@@ -78,6 +77,97 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
         DetaActividadTeleModel.update(model, { where: { detalleId } }).then(resolve).catch(reject)
       } else {
         reject({ message: `user:${id} not found` })
+      }
+    })
+  }
+
+  function updateCabEnviarSemana (actividadId, model) {
+    const { rolAutorizador, rolEmpleado, nombreCompleto } = model
+    return new Promise(async (resolve, reject) => {
+      let instance = await CabActividadTeleModel.findOne({
+        where: { actividadId }
+      })
+      let emailAutorizador = await VistaDatoEmpleadoModel.sequelize.query(`select E_MAIL from fcb_v_dato_empl where ROL_EMPL = '${rolAutorizador}'`, {
+        type: QueryTypes.SELECT,
+        plain: true
+      })
+      let emailSolicitante = await VistaDatoEmpleadoModel.sequelize.query(`select E_MAIL from fcb_v_dato_empl where ROL_EMPL = '${rolEmpleado}'`, {
+        type: QueryTypes.SELECT,
+        plain: true
+      })
+      const { E_MAIL: emailAutoriza } = emailAutorizador
+      const { E_MAIL: emailSolicita } = emailSolicitante
+
+      if (instance) {
+        CabActividadTeleModel.update({ estadoActividad: 'SE' }, { where: { actividadId } }).then(() => {
+          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailAutoriza}','${emailSolicita}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} le ha enviado actividades para su aprobacion.'); END; `).then(() => {
+            resolve({ success: true })
+          })
+
+        })
+
+      } else {
+        reject({ message: `no hay cabecera para enviar` })
+      }
+
+    })
+
+  }
+
+  function updateCabDevolverActi (actividadId, model) {
+    const { rolAutorizador, rolEmpleado, nombreCompleto } = model
+    return new Promise(async (resolve, reject) => {
+      let instance = await CabActividadTeleModel.findOne({
+        where: { actividadId }
+      })
+      let emailAutorizador = await VistaDatoEmpleadoModel.sequelize.query(`select E_MAIL from fcb_v_dato_empl where ROL_EMPL = '${rolAutorizador}'`, {
+        type: QueryTypes.SELECT,
+        plain: true
+      })
+      let emailSolicitante = await VistaDatoEmpleadoModel.sequelize.query(`select E_MAIL from fcb_v_dato_empl where ROL_EMPL = '${rolEmpleado}'`, {
+        type: QueryTypes.SELECT,
+        plain: true
+      })
+      const { E_MAIL: emailAutoriza } = emailAutorizador
+      const { E_MAIL: emailSolicita } = emailSolicitante
+
+      if (instance) {
+        CabActividadTeleModel.update({ estadoActividad: 'DE' }, { where: { actividadId } }).then(() => {
+
+          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailSolicita}','${emailAutoriza}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} revise sus actividades ya que han sido devueltas.'); END; `).then(() => {
+            resolve({ success: true })
+          })
+
+        })
+      } else {
+        reject({ message: `no hay cabecera para enviar` })
+      }
+    })
+  }
+
+  function updateDetaDevolverActi (detalleId, model) {
+    const { actividadId } = model
+    return new Promise(async (resolve, reject) => {
+      let instance = await DetaActividadTeleModel.findOne({
+        where: { detalleId }
+      })
+      if (instance) {
+        DetaActividadTeleModel.update({ aprobacionJefatura: 'AD' }, { where: { detalleId } }).then(
+          async () => {
+            const count = await DetaActividadTeleModel.count({ where: { actividadId, aprobacionJefatura: 'AD' } })
+            console.log('numero', count)
+            if (count > 0) {
+              CabActividadTeleModel.update({ estadoActividad: 'DE' }, { where: { actividadId } })
+                .then(() => {
+                  resolve({ success: true })
+                })
+            } else {
+              resolve({ success: true })
+            }
+          }).catch(reject)
+
+      } else {
+        reject({ message: `no hay cabecera para enviar` })
       }
     })
   }
@@ -118,7 +208,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     return CabActividadTeleModel.findAll({
       where: {
         ROL_EMPL,
-        estadoActividad: 'AC'
+        estadoActividad: ['AC', 'DE']
       }
     })
   }
@@ -127,7 +217,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     return CabActividadTeleModel.findAll({
       where: {
         ROL_AUTO,
-        estadoActividad: 'AC'
+        estadoActividad: ['SE']
       }
     })
   }
@@ -135,15 +225,54 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   function findAllDetActividades (actividadId) {
     return DetaActividadTeleModel.findAll({
       where: {
-        actividadId
+        actividadId,
+        aprobacionJefatura: ['AC', 'AD', 'AA']
       }
+    })
+  }
+
+  // function findAllActiDiariasBySemana (actividadId) {
+  //   return CabActividadTeleModel.findAll({
+  //     raw: true,
+  //     where: {
+  //       actividadId
+  //     },
+  //     attributes: [['FECH_INIC', 'Fecha Inicio'], ['FECH_FINA', 'Fecha Fin'], ['NOMB_COMP', 'Nombre Completo'], ['ESTA_ACTI', 'Estado']],
+  //     include: [
+  //       {
+  //         raw: true,
+  //         attributes: ['DESC_ACTI'],
+  //         model: DetaActividadTeleModel,
+  //         required: true
+  //       }
+  //     ]
+  //   })
+  // }
+
+  function findAllActiDiariasBySemana (actividadId) {
+    return CabActividadTeleModel.sequelize.query(`select c.fech_inic as semanaInicio,
+  c.fech_fina as semanaFin,
+  c.nomb_comp as nombreCompleto,
+  c.esta_acti as estado,
+  d.desc_acti as descripcion,
+  d.prod_entr as producto,
+  d.avan_porc as avance,
+  d.obse_acti as observacion,
+  d.refe_acti as referencia,
+  d.dia_sema as fecha
+  from rh_apc_t_acti_tele c
+  join rh_apc_t_deta_acti_tele d
+  on c.actividad_id = d.actividad_id
+  where c.actividad_id = '${actividadId}'`, {
+      type: QueryTypes.SELECT
     })
   }
 
   function findAllDetActividadesAutorizador (actividadId) {
     return DetaActividadTeleModel.findAll({
       where: {
-        actividadId, aprobacionJefatura: null, fechaAprobacion: null
+        actividadId,
+        aprobacionJefatura: ['AC', 'AA']
       }
     })
   }
@@ -179,8 +308,12 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     findAllDetActividades,
     findAllCabActiAutorizador,
     findAllDetActividadesAutorizador,
+    findAllActiDiariasBySemana,
     updateDetalle,
+    updateDetaDevolverActi,
     updateDetalleAutorizador,
+    updateCabEnviarSemana,
+    updateCabDevolverActi,
     deleteActividad,
     deleteDetaActividad
   }
