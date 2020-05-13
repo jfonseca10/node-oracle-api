@@ -1,6 +1,6 @@
 const { v1 } = require('uuid')
 const moment = require('moment')
-const { fn, and  } = require('sequelize-oracle')
+const { fn, and } = require('sequelize-oracle')
 
 module.exports = function setupRegistroAsistencia (RegistroAsistenciaModel) {
 
@@ -36,18 +36,21 @@ module.exports = function setupRegistroAsistencia (RegistroAsistenciaModel) {
   }
 
   function consultarAsistencias (model) {
-    //const { rol, fechaInicio, fechaFin } = model
+    const { rol, startDate, endDate } = model
     //const fechaInicio = '13/04/2020';
     //const fechaFin = '14/04/2020';
-    console.log('fechafin')
-    const rol = '57559'
-    const fechaInicio = moment().subtract(1, 'hours').toDate()
-    const fechaFin = moment().subtract(9, 'hours').toDate()
+    console.log('fechaInicio', startDate)
+    console.log('fechaInicio', endDate)
+    // const fechaInicio = moment().subtract(1, 'hours').toDate()
+    // const fechaFin = moment().subtract(9, 'hours').toDate()
     return RegistroAsistenciaModel.findAll(
       {
+        attributes: ['tipoRegistro', 'fechaHora', 'generado'],
         where:
           {
-            'rolUsuario': rol
+            rolUsuario: rol,
+            fechaHora: { $between: [moment(startDate).subtract(5, 'hours').toDate(), moment(endDate).subtract(5, 'hours').toDate()] },
+            generado: 'T'
           }
       }
     )

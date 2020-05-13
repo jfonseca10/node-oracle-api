@@ -46,16 +46,14 @@ api.post('/finAsistencia', async (req, res, next) => {
   }
 })
 
-api.post('/consultarAsistencia', async (req, res, next) => {
+api.post('/consultarRegistroAsistencias', async (req, res, next) => {
   const dato = req.body
   let result
   try {
     result = await RegistroAsistencia.consultarAsistencias(dato).catch(e => {
       res.status(406).send(result)
     })
-    console.log(result);
     if (result) {
-
       res.send(result)
     }
   } catch (e) {

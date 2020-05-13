@@ -54,8 +54,14 @@ module.exports = function setupDetaActividadTeleModel (config) {
         field: 'FECH_APROB',
         type: Sequelize.DATEONLY,
         allowNull: true
+      },
+      etapaActividad: {
+        field: 'ETAP_ACTI',
+        type: Sequelize.STRING,
+        allowNull: true
       }
-    }, {
+    },
+    {
       tableName: 'RH_APC_T_DETA_ACTI_TELE',
       timestamps: false
     }

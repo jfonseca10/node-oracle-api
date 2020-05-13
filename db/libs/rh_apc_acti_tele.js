@@ -14,7 +14,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       model.fechaInicio = moment(fechaInicio, 'DD/MM/YYYY').toDate()
       model.fechaFin = moment(fechaFin, 'DD/MM/YYYY').toDate()
       model.fechaCrea = moment().subtract(5, 'hours').toDate()
-      model.estadoActividad = 'AC'
+      model.estadoActividad = 'CREADA'
       model.rolAutorizador = rolJefatura
       model.nombreCompleto = name
       model.centroCosto = CENT_COST
@@ -44,21 +44,30 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     return new Promise(async (resolve, reject) => {
       const {
         actividadId, descripcionActividad, observacionActividad,
-        productoDigitalEntregable, fechaInicio, avancePorcentaje, referenciaActividad
+        productoDigitalEntregable, fechaInicio, avancePorcentaje, referenciaActividad, etapaActividad
       } = model
       model.detalleId = v1()
       model.actividadId = actividadId
       model.diaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
       model.descripcionActividad = descripcionActividad
       model.productoDigitalEntregable = productoDigitalEntregable
-      model.avancePorcentaje = avancePorcentaje
+      model.avancePorcentaje = ''
       model.observacionActividad = observacionActividad
       model.referenciaActividad = referenciaActividad
-      model.aprobacionJefatura = 'AC'
+      model.aprobacionJefatura = 'CREADA'
       model.fechaAprobacion = ''
+      model.etapaActividad = etapaActividad
       DetaActividadTeleModel.create(model).then(result => {
-        const { actividadId, descripcion, observacion, productoEntregable, fechaInicio, porcentajeAvance } = result
-        resolve({ actividadId, descripcion, observacion, productoEntregable, fechaInicio, porcentajeAvance })
+        const { actividadId, descripcion, observacion, productoEntregable, fechaInicio, porcentajeAvance, etapaActividad } = result
+        resolve({
+          actividadId,
+          descripcion,
+          observacion,
+          productoEntregable,
+          fechaInicio,
+          porcentajeAvance,
+          etapaActividad
+        })
       })
     })
   }
@@ -66,7 +75,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   function updateDetalle (detalleId, model) {
     const { fechaInicio } = model
     model.diaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
-    model.aprobacionJefatura = 'AA'
+    model.aprobacionJefatura = 'ACTUALIZADA'
     console.log(model)
     //promesa para retornar codigo asincrono , consiste en 2 funciones : response, reject
     return new Promise(async (resolve, reject) => {
@@ -99,7 +108,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       const { E_MAIL: emailSolicita } = emailSolicitante
 
       if (instance) {
-        CabActividadTeleModel.update({ estadoActividad: 'SE' }, { where: { actividadId } }).then(() => {
+        CabActividadTeleModel.update({ estadoActividad: 'ENVIADA' }, { where: { actividadId } }).then(() => {
           VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailAutoriza}','${emailSolicita}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} le ha enviado actividades para su aprobacion.'); END; `).then(() => {
             resolve({ success: true })
           })
@@ -132,7 +141,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       const { E_MAIL: emailSolicita } = emailSolicitante
 
       if (instance) {
-        CabActividadTeleModel.update({ estadoActividad: 'DE' }, { where: { actividadId } }).then(() => {
+        CabActividadTeleModel.update({ estadoActividad: 'DEVUELTA' }, { where: { actividadId } }).then(() => {
 
           VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailSolicita}','${emailAutoriza}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} revise sus actividades ya que han sido devueltas.'); END; `).then(() => {
             resolve({ success: true })
@@ -152,12 +161,12 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
         where: { detalleId }
       })
       if (instance) {
-        DetaActividadTeleModel.update({ aprobacionJefatura: 'AD' }, { where: { detalleId } }).then(
+        DetaActividadTeleModel.update({ aprobacionJefatura: 'DEVUELTA' }, { where: { detalleId } }).then(
           async () => {
             const count = await DetaActividadTeleModel.count({ where: { actividadId, aprobacionJefatura: 'AD' } })
             console.log('numero', count)
             if (count > 0) {
-              CabActividadTeleModel.update({ estadoActividad: 'DE' }, { where: { actividadId } })
+              CabActividadTeleModel.update({ estadoActividad: 'DEVUELTA' }, { where: { actividadId } })
                 .then(() => {
                   resolve({ success: true })
                 })
@@ -187,7 +196,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
             type: QueryTypes.RAW
           })
           .then(async () => {
-            const pentA = await DetaActividadTeleModel.count({ where: { actividadId, aprobacionJefatura: null } })
+            const pentA = await DetaActividadTeleModel.count({ where: { actividadId, fechaAprobacion: null } })
             console.log('numero', pentA)
             if (pentA === 0) {
               CabActividadTeleModel.update({ estadoActividad: 'AP' }, { where: { actividadId } })
@@ -208,7 +217,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     return CabActividadTeleModel.findAll({
       where: {
         ROL_EMPL,
-        estadoActividad: ['AC', 'DE']
+        estadoActividad: ['CREADA', 'DEVUELTA']
       }
     })
   }
@@ -217,7 +226,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     return CabActividadTeleModel.findAll({
       where: {
         ROL_AUTO,
-        estadoActividad: ['SE']
+        estadoActividad: ['ENVIADA']
       }
     })
   }
@@ -226,7 +235,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     return DetaActividadTeleModel.findAll({
       where: {
         actividadId,
-        aprobacionJefatura: ['AC', 'AD', 'AA']
+        aprobacionJefatura: ['CREADA', 'DEVUELTA', 'ACTUALIZADA']
       }
     })
   }
@@ -272,7 +281,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     return DetaActividadTeleModel.findAll({
       where: {
         actividadId,
-        aprobacionJefatura: ['AC', 'AA']
+        aprobacionJefatura: ['CREADA', 'ACTUALIZADA']
       }
     })
   }

@@ -57,7 +57,6 @@ api.get('/actividadesDetalleList', async (req, res, next) => {
   let result
   try {
     result = await ActividadTele.findAllDetActividades(actividadId)
-    console.log('resultjjj', result)
     if (result && result.length > 0) {
       res.send(result)
     } else {
@@ -73,7 +72,6 @@ api.get('/actiDetaListAutorizador', async (req, res, next) => {
   let result
   try {
     result = await ActividadTele.findAllDetActividadesAutorizador(actividadId)
-    console.log('resultjjj', result)
     if (result && result.length > 0) {
       res.send(result)
     } else {
@@ -105,7 +103,6 @@ api.post('/createActividad', async (req, res, next) => {
       CENT_COST
     }
     result = await ActividadTele.crearCabecera(newActividad).catch(e => {
-      console.log('api error', e)
       res.status(406).send('el rango de fechas es maximo de 7 dias y no se puede ingresar un dia que ya exista en el rango')
     })
     if (result) {
@@ -118,7 +115,6 @@ api.post('/createActividad', async (req, res, next) => {
 
 api.post('/createDetalleActividad', async (req, res, next) => {
   const newActividad = req.body
-  console.log('api', newActividad)
   let result
   try {
     result = await ActividadTele.crearDetalle(newActividad).catch(e => {
@@ -140,7 +136,6 @@ api.post('/updateDetalleActividad/:id', async (req, res, next) => {
     result = await ActividadTele.updateDetalle(id, model).catch(e => {
       res.status(406).send(e)
     })
-    console.log('la respuesta es: ', result)
     if (result) {
       res.send(result)
     }
@@ -156,7 +151,6 @@ api.post('/aprobacionAutorizador/:id', async (req, res, next) => {
   let result
   try {
     result = await ActividadTele.updateDetalleAutorizador(id, model)
-    console.log('la respuesta es: ', result)
     if (result) {
       res.send(result)
     }
@@ -171,7 +165,6 @@ api.post('/devolverActividadSemana/:id', async (req, res, next) => {
   let result
   try {
     result = await ActividadTele.updateCabDevolverActi(id, model)
-    console.log('la respuesta es: ', result)
     if (result) {
       res.send(result)
     }
@@ -186,7 +179,6 @@ api.post('/devolverActividadDiaria/:id', async (req, res, next) => {
   let result
   try {
     result = await ActividadTele.updateDetaDevolverActi(id, model)
-    console.log('la respuesta es: ', result)
     if (result) {
       res.send(result)
     }
@@ -197,7 +189,6 @@ api.post('/devolverActividadDiaria/:id', async (req, res, next) => {
 
 api.post('/enviarSemanaAprobacion/:id', async (req, res, next) => {
   const model = req.body
-
   const { id } = req.params
   let result
   try {
@@ -241,7 +232,6 @@ api.get('/actividadesExport', async (req, res, next) => {
   let result
   try {
     result = await ActividadTele.findAllDetActividades(actividadId)
-    console.log('resultjjj', result)
     if (result && result.length > 0) {
       const xlxsFile = jsonToXml(result)
       const filename = `report${moment().format('YYYYMMDDHHmmss')}.xlsx`
@@ -261,7 +251,6 @@ api.get('/actividadesExportReport', async (req, res, next) => {
   let result
   try {
     result = await ActividadTele.findAllActiDiariasBySemana(actividadId)
-    console.log('resultjjj', result)
     if (result && result.length > 0) {
       const xlxsFile = jsonToXml(result)
       const filename = `report${moment().format('YYYYMMDDHHmmss')}.xlsx`
