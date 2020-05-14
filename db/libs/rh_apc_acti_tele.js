@@ -163,7 +163,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       if (instance) {
         DetaActividadTeleModel.update({ aprobacionJefatura: 'DEVUELTA' }, { where: { detalleId } }).then(
           async () => {
-            const count = await DetaActividadTeleModel.count({ where: { actividadId, aprobacionJefatura: 'AD' } })
+            const count = await DetaActividadTeleModel.count({ where: { actividadId, aprobacionJefatura: 'DEVUELTA' } })
             console.log('numero', count)
             if (count > 0) {
               CabActividadTeleModel.update({ estadoActividad: 'DEVUELTA' }, { where: { actividadId } })
