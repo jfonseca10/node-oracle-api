@@ -91,7 +91,9 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   }
 
   function updateCabEnviarSemana (actividadId, model) {
-    const { rolAutorizador, rolEmpleado, nombreCompleto } = model
+    const { rolAutorizador, rolEmpleado, nombreCompleto, fechaInicio, fechaFin } = model
+    let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
+    let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
     return new Promise(async (resolve, reject) => {
       let instance = await CabActividadTeleModel.findOne({
         where: { actividadId }
@@ -109,7 +111,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
       if (instance) {
         CabActividadTeleModel.update({ estadoActividad: 'ENVIADA' }, { where: { actividadId } }).then(() => {
-          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailAutoriza}','${emailSolicita}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} le ha enviado actividades para su aprobacion.'); END; `).then(() => {
+          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailAutoriza}','${emailSolicita}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} le ha enviado la actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} para su aprobacion.'); END; `).then(() => {
             resolve({ success: true })
           })
 
@@ -124,7 +126,9 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   }
 
   function updateCabDevolverActi (actividadId, model) {
-    const { rolAutorizador, rolEmpleado, nombreCompleto } = model
+    const { rolAutorizador, rolEmpleado, nombreCompleto, fechaInicio, fechaFin } = model
+    let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
+    let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
     return new Promise(async (resolve, reject) => {
       let instance = await CabActividadTeleModel.findOne({
         where: { actividadId }
@@ -143,7 +147,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       if (instance) {
         CabActividadTeleModel.update({ estadoActividad: 'DEVUELTA' }, { where: { actividadId } }).then(() => {
 
-          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailSolicita}','${emailAutoriza}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} revise sus actividades ya que han sido devueltas.'); END; `).then(() => {
+          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailSolicita}','${emailAutoriza}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} su actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} ya que han sido devueltas.'); END; `).then(() => {
             resolve({ success: true })
           })
 
