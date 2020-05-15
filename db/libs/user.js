@@ -4,7 +4,7 @@ const { api } = require('config')
 const nodemailer = require('nodemailer')
 require('dotenv').config()
 
-module.exports = function setupUser (UserModel) {
+module.exports = function setupUser (UserModel, VistaDatoEmpleadoModel) {
   function findUserByUserName (rol) {
     return UserModel.findOne({
         where: { rol },
@@ -72,33 +72,36 @@ module.exports = function setupUser (UserModel) {
   function sendMailResetPass (emailResult, link) {
     const { email } = emailResult
     console.log('link', link)
-    let transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD
-      }
+
+    VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailResult}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${link}'); END; `).then(() => {
+      resolve({ success: true })
     })
 
-    let mailOptions = {
-      from: 'controlasistenciaseeq@gmail.com',
-      to: email,
-      subject: 'Reseteo clave Sistema Control de Asistencia',
-      text: link
-    }
+    // let transporter = nodemailer.createTransport({
+    //   service: 'gmail',
+    //   auth: {
+    //     user: process.env.EMAIL,
+    //     pass: process.env.PASSWORD
+    //   }
+    // })
 
-    transporter.sendMail(mailOptions, function (err, data) {
-      if (err) {
-        console.log('Ocurrio un error')
-      } else {
-        console.log('Se envio el email')
-      }
+    // let mailOptions = {
+    //   from: 'controlasistenciaseeq@gmail.com',
+    //   to: email,
+    //   subject: 'Reseteo clave Sistema Control de Asistencia',
+    //   text: link
+    // }
 
-    })
+    // transporter.sendMail(mailOptions, function (err, data) {
+    //   if (err) {
+    //     console.log('Ocurrio un error')
+    //   } else {
+    //     console.log('Se envio el email')
+    //   }
+    //
+    // })
 
   }
-
-
 
   return {
     findUserByUserName,

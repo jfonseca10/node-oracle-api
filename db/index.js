@@ -39,7 +39,7 @@ module.exports = async function () {
   /* RELATIONS MODELS */
   CabActividadTeleModel.hasMany(DetaActividadTeleModel, { foreignKey: 'ACTIVIDAD_ID', targetKey: 'ACTIVIDAD_ID' })
   /* CREATE LIBS*/
-  const User = setupUser(UserModel)
+  const User = setupUser(UserModel, VistaDatoEmpleadoModel)
   const Region = setupRegion(RegionModel, CountryModel)
   const VistaDatoEmpleado = setupVistaDatoEmpleado(VistaDatoEmpleadoModel)
   const RegistroAsistencia = setupRegistroAsistencia(RegistroAsistenciaModel)
