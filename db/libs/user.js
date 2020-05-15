@@ -73,12 +73,12 @@ module.exports = function setupUser (UserModel, VistaDatoEmpleadoModel) {
     const { email } = emailResult
     console.log('link', link)
 
-    VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailResult}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${link}'); END; `).then(() => {
+     VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailResult}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${link}'); END; `).then(() => {
       resolve({ success: true })
-    })
+     })
 
     // let transporter = nodemailer.createTransport({
-    //   service: 'gmail',
+     //   service: 'gmail',
     //   auth: {
     //     user: process.env.EMAIL,
     //     pass: process.env.PASSWORD
