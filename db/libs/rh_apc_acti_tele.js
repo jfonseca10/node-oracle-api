@@ -92,8 +92,8 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
   function updateCabEnviarSemana (actividadId, model) {
     const { rolAutorizador, rolEmpleado, nombreCompleto, fechaInicio, fechaFin } = model
-    let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
-    let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
+     let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
+     let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
     return new Promise(async (resolve, reject) => {
       let instance = await CabActividadTeleModel.findOne({
         where: { actividadId }
@@ -127,8 +127,8 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
   function updateCabDevolverActi (actividadId, model) {
     const { rolAutorizador, rolEmpleado, nombreCompleto, fechaInicio, fechaFin } = model
-    let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
-    let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
+     let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
+     let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
     return new Promise(async (resolve, reject) => {
       let instance = await CabActividadTeleModel.findOne({
         where: { actividadId }
