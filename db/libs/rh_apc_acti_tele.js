@@ -111,7 +111,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
       if (instance) {
         CabActividadTeleModel.update({ estadoActividad: 'ENVIADA' }, { where: { actividadId } }).then(() => {
-          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailAutoriza}','${emailSolicita}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} le ha enviado la actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} para su aprobacion.'); END; `).then(() => {
+           VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailAutoriza}','${emailSolicita}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} le ha enviado la actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} para su aprobacion.'); END; `).then(() => {
             resolve({ success: true })
           })
 
@@ -147,7 +147,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       if (instance) {
         CabActividadTeleModel.update({ estadoActividad: 'DEVUELTA' }, { where: { actividadId } }).then(() => {
 
-          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailSolicita}','${emailAutoriza}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} su actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} ya que han sido devueltas.'); END; `).then(() => {
+           VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailSolicita}','${emailAutoriza}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} su actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} ya que han sido devueltas.'); END; `).then(() => {
             resolve({ success: true })
           })
 
