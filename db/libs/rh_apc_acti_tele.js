@@ -46,29 +46,41 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
         actividadId, descripcionActividad, observacionActividad,
         productoDigitalEntregable, fechaInicio, avancePorcentaje, referenciaActividad, etapaActividad
       } = model
-      model.detalleId = v1()
-      model.actividadId = actividadId
-      model.diaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
-      model.descripcionActividad = descripcionActividad
-      model.productoDigitalEntregable = productoDigitalEntregable
-      model.avancePorcentaje = ''
-      model.observacionActividad = observacionActividad
-      model.referenciaActividad = referenciaActividad
-      model.aprobacionJefatura = 'CREADA'
-      model.fechaAprobacion = ''
-      model.etapaActividad = etapaActividad
-      DetaActividadTeleModel.create(model).then(result => {
-        const { actividadId, descripcion, observacion, productoEntregable, fechaInicio, porcentajeAvance, etapaActividad } = result
-        resolve({
+
+      const numero = await DetaActividadTeleModel.count({
+        where: {
           actividadId,
-          descripcion,
-          observacion,
-          productoEntregable,
-          fechaInicio,
-          porcentajeAvance,
-          etapaActividad
-        })
+          diaSemana: { $between: [moment(`${fechaInicio} 00:00`).subtract(5, 'hours').toDate(), moment(`${fechaInicio} 23:59`).subtract(5, 'hours').toDate()] }
+        }
       })
+      if (numero < 5) {
+        model.detalleId = v1()
+        model.actividadId = actividadId
+        model.diaSemana = moment(fechaInicio).subtract(5, 'hours').toDate()
+        model.descripcionActividad = descripcionActividad
+        model.productoDigitalEntregable = productoDigitalEntregable
+        model.avancePorcentaje = ''
+        model.observacionActividad = observacionActividad
+        model.referenciaActividad = referenciaActividad
+        model.aprobacionJefatura = 'CREADA'
+        model.fechaAprobacion = ''
+        model.etapaActividad = etapaActividad
+        DetaActividadTeleModel.create(model).then(result => {
+          const { actividadId, descripcion, observacion, productoEntregable, fechaInicio, porcentajeAvance, etapaActividad } = result
+          resolve({
+            actividadId,
+            descripcion,
+            observacion,
+            productoEntregable,
+            fechaInicio,
+            porcentajeAvance,
+            etapaActividad
+          })
+        })
+      } else {
+        reject({ message: 'No puede ingresar mas de 5 actividades diarias' })
+      }
+
     })
   }
 
@@ -92,8 +104,8 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
   function updateCabEnviarSemana (actividadId, model) {
     const { rolAutorizador, rolEmpleado, nombreCompleto, fechaInicio, fechaFin } = model
-     let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
-     let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
+    let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
+    let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
     return new Promise(async (resolve, reject) => {
       let instance = await CabActividadTeleModel.findOne({
         where: { actividadId }
@@ -111,7 +123,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
       if (instance) {
         CabActividadTeleModel.update({ estadoActividad: 'ENVIADA' }, { where: { actividadId } }).then(() => {
-           VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailAutoriza}','${emailSolicita}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} le ha enviado la actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} para su aprobacion.'); END; `).then(() => {
+          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailAutoriza}','${emailSolicita}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} le ha enviado la actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} para su aprobacion.'); END; `).then(() => {
             resolve({ success: true })
           })
 
@@ -127,8 +139,8 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
 
   function updateCabDevolverActi (actividadId, model) {
     const { rolAutorizador, rolEmpleado, nombreCompleto, fechaInicio, fechaFin } = model
-     let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
-     let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
+    let fechaInicioSemana = moment(fechaInicio).calendar(null, { sameElse: 'YYYY-MM-DD' })
+    let fechaFinSemana = moment(fechaFin).calendar(null, { sameElse: 'YYYY-MM-DD' })
     return new Promise(async (resolve, reject) => {
       let instance = await CabActividadTeleModel.findOne({
         where: { actividadId }
@@ -147,7 +159,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       if (instance) {
         CabActividadTeleModel.update({ estadoActividad: 'DEVUELTA' }, { where: { actividadId } }).then(() => {
 
-           VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailSolicita}','${emailAutoriza}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} su actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} ya que han sido devueltas.'); END; `).then(() => {
+          VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${emailSolicita}','${emailAutoriza}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${nombreCompleto} su actividad semanal del ${fechaInicioSemana} al ${fechaFinSemana} ya que han sido devueltas.'); END; `).then(() => {
             resolve({ success: true })
           })
 

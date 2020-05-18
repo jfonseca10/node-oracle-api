@@ -118,8 +118,9 @@ api.post('/createDetalleActividad', async (req, res, next) => {
   let result
   try {
     result = await ActividadTele.crearDetalle(newActividad).catch(e => {
-      res.status(406).send(result)
+      res.status(406).send(e.message)
     })
+
     if (result) {
       res.send(result)
     }
