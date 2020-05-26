@@ -32,4 +32,12 @@ api.get('/getDatoEmpleado', async (req, res, next) => {
 
 })
 
+api.get('/manualExport', async (req, res, next) => {
+  try {
+    res.download(`./temp/Manual.pdf`)
+  } catch (e) {
+    return next(e)
+  }
+})
+
 module.exports = api

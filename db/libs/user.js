@@ -72,13 +72,12 @@ module.exports = function setupUser (UserModel, VistaDatoEmpleadoModel) {
 
   function sendMailResetPass (emailResult, link) {
     const { email } = emailResult
-    console.log('link', link)
     return new Promise(async (resolve, reject) => {
       let e = VistaDatoEmpleadoModel.sequelize.query(`BEGIN sendmail('${email}','${email}','Postmaster@eeq.com.ec','Sistema de control de asistencias y registro de actividades','${link}'); END; `).then(() => {
         resolve({ success: true })
       })
-      console.log('resultad', e)
     })
+
 
     // let transporter = nodemailer.createTransport({
     //   service: 'gmail',
