@@ -34,6 +34,7 @@ api.get('/getDatoEmpleado', async (req, res, next) => {
 
 api.get('/manualExport', async (req, res, next) => {
   try {
+    console.log('ee')
     res.download(`./temp/Manual.pdf`)
   } catch (e) {
     return next(e)
