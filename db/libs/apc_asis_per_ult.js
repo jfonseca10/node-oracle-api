@@ -49,9 +49,10 @@ module.exports = function setupRegistroAsistencia (RegistroAsistenciaModel) {
         where:
           {
             rolUsuario: rol,
-            fechaHora: { $between: [moment(startDate).subtract(5, 'hours').toDate(), moment(endDate).subtract(5, 'hours').toDate()] },
+            fechaHora: { $between: [moment(startDate).toDate(), moment(endDate).toDate()] },
             generado: 'T'
-          }
+          },
+        order: [['FECHA_HORA', 'DESC']]
       }
     )
   }

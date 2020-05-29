@@ -2,7 +2,7 @@ const { api } = require('config')
 const jwt = require('jsonwebtoken')
 
 sign = (payload) => {
-  return jwt.sign(payload, api.secret)
+  return jwt.sign(payload, api.secret, { expiresIn: '1d' })
 }
 
 verify = (payload) => {
