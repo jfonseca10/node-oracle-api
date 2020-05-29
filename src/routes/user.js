@@ -151,7 +151,6 @@ api.post('/returnAction', async (req, res, next) => {
 
 api.get('/manualExport', async (req, res, next) => {
   try {
-    console.log('ee')
     res.download('../../manuales/Manual.pdf')
   } catch (e) {
     return next(e)

@@ -303,7 +303,6 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   }
 
   function deleteActividad (detalleId) {
-    console.log('e', detalleId)
     return new Promise(async (resolve, reject) => {
       DetaActividadTeleModel.sequelize.query(`delete from RH_APC_T_ACTI_TELE where ACTIVIDAD_ID =  '${detalleId}'`, {
         type: QueryTypes.DELETE,
