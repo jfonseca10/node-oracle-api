@@ -281,6 +281,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
   c.esta_acti as estado,
   d.desc_acti as descripcion,
   d.prod_entr as producto,
+  d.etap_acti as etapa,
   d.avan_porc as avance,
   d.obse_acti as observacion,
   d.refe_acti as referencia,
