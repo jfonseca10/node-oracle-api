@@ -17,14 +17,12 @@ module.exports = function setupVistaDatoEmpleado (VistaDatoEmpleadoModel) {
   }
 
   function findAllDatosSolicitantes (rol) {
+    console.log('lib', rol)
     const rolnew = []
     for (var i = 0; i < rol.length; i++) {
       // rolnew = rol[i].rolEmpleado
       rolnew.push(`'` + rol[i].rolEmpleado + `'`)
     }
-
-    console.log('los valores', rolnew)
-
     return VistaDatoEmpleadoModel.sequelize.query(`select ROL_EMPL,NOMB_EMPL from fcb_v_dato_empl where ROL_EMPL in (${rolnew})`, {
       type: QueryTypes.SELECT
     })

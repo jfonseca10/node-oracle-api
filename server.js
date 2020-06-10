@@ -18,7 +18,7 @@ const authmiddleware = require('./middleware/auth')
 const regionRoute = require('./src/routes/region')
 const actividadesRoute = require('./src/routes/actividades')
 const registroAsistenciaRoute = require('./src/routes/registroAsistencia')
-
+const jefeRoute = require('./src/routes/jefe')
 
 const app = asyncnify(express())
 let server
@@ -45,6 +45,7 @@ app.use(authmiddleware)
 app.use('/actividades', actividadesRoute)
 app.use('/registroAsistencia', registroAsistenciaRoute)
 app.use('/region', regionRoute)
+app.use('/jefe', jefeRoute)
 
 server.listen(api.port, () => {
   console.log(`aplicacion en ejecucion puerto ${api.port}`)

@@ -155,7 +155,7 @@ api.get('/manualExport', async (req, res, next) => {
   } catch (e) {
     return next(e)
   }
-}) 
+})
 
 api.use(authMiddleware)
 api.get('/listUser', async (req, res, next) => {

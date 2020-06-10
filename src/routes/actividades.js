@@ -89,24 +89,32 @@ api.post('/createActividad', async (req, res, next) => {
   let resultJefatura
   let centroCosto
   try {
-    resultJefatura = await EmpleadoJefatura.findJefaturaByEmpleado(rol)
-    const { rolJefatura } = resultJefatura
-    centroCosto = await EmpleadoData.findCentroCostoByEmpleado(rol)
-    const { CENT_COST } = centroCosto
-    console.log('este es el costo', CENT_COST)
-    const newActividad = {
-      rol,
-      name,
-      fechaInicio,
-      fechaFin,
-      rolJefatura,
-      CENT_COST
-    }
-    result = await ActividadTele.crearCabecera(newActividad).catch(e => {
-      res.status(406).send('el rango de fechas es maximo de 7 dias y no se puede ingresar un dia que ya exista en el rango')
+    resultJefatura = await EmpleadoJefatura.findJefaturaByEmpleado(rol).catch(e => {
+      res.status(406).send('No es posible agregar actividades, contactese con el area de RR.HH para la asignacion de una jefatura.')
     })
-    if (result) {
-      res.send(result)
+    console.log('jefatura', resultJefatura)
+    if (resultJefatura === null){
+      res.status(406).send('No es posible agregar actividades, contactese con el area de RR.HH para la asignacion de una jefatura.')
+      return
+    }else{
+      const { rolJefatura } = resultJefatura
+      centroCosto = await EmpleadoData.findCentroCostoByEmpleado(rol)
+      const { CENT_COST } = centroCosto
+      console.log('este es el costo', CENT_COST)
+      const newActividad = {
+        rol,
+        name,
+        fechaInicio,
+        fechaFin,
+        rolJefatura,
+        CENT_COST
+      }
+      result = await ActividadTele.crearCabecera(newActividad).catch(e => {
+        res.status(406).send('el rango de fechas es maximo de 7 dias y no se puede ingresar un dia que ya exista en el rango')
+      })
+      if (result) {
+        res.send(result)
+      }
     }
   } catch (e) {
     return next(e)

@@ -293,6 +293,32 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     })
   }
 
+  function findAllActiByEmpleadoByFecha (model) {
+    const { ROL_EMPL, estadoActividad, fechaInicio, fechaFin } = model
+    let estado
+    if (estadoActividad === 'RECIBIDA') {
+      estado = 'ENVIADO'
+    } else {
+      estado = 'AP'
+    }
+    return CabActividadTeleModel.findAll({
+      attributes: [['FECH_INIC', 'fechaInicioPeriodo'], ['FECH_FINA', 'fechaFinPeriodo'],
+        ['NOMB_COMP', 'Nombre']],
+      include: [{
+        model: DetaActividadTeleModel,
+        attributes: [['DESC_ACTI','descripcion']],
+        required: true
+      }],
+      where: {
+        rolEmpleado: ROL_EMPL,
+        estadoActividad: estado,
+        fechaInicio: { $gte: moment(fechaInicio).toDate() },
+        fechaFin: { $lte: moment(fechaFin).toDate() }
+      },
+      raw: true
+    })
+  }
+
   function findAllDetActividadesAutorizador (actividadId) {
     return DetaActividadTeleModel.findAll({
       where: {
@@ -333,6 +359,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     findAllCabActiAutorizador,
     findAllDetActividadesAutorizador,
     findAllActiDiariasBySemana,
+    findAllActiByEmpleadoByFecha,
     updateDetalle,
     updateDetaDevolverActi,
     updateDetalleAutorizador,
