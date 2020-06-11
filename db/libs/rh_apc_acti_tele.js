@@ -1,6 +1,7 @@
 const { v1 } = require('uuid')
 const moment = require('moment')
 const { QueryTypes } = require('sequelize-oracle')
+const { col } = require('sequelize-oracle')
 module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActividadTeleModel, VistaDatoEmpleadoModel) {
 
   function crearCabecera (model) {
@@ -256,24 +257,6 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     })
   }
 
-  // function findAllActiDiariasBySemana (actividadId) {
-  //   return CabActividadTeleModel.findAll({
-  //     raw: true,
-  //     where: {
-  //       actividadId
-  //     },
-  //     attributes: [['FECH_INIC', 'Fecha Inicio'], ['FECH_FINA', 'Fecha Fin'], ['NOMB_COMP', 'Nombre Completo'], ['ESTA_ACTI', 'Estado']],
-  //     include: [
-  //       {
-  //         raw: true,
-  //         attributes: ['DESC_ACTI'],
-  //         model: DetaActividadTeleModel,
-  //         required: true
-  //       }
-  //     ]
-  //   })
-  // }
-
   function findAllActiDiariasBySemana (actividadId) {
     return CabActividadTeleModel.sequelize.query(`select c.fech_inic as semanaInicio,
   c.fech_fina as semanaFin,
@@ -302,11 +285,14 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       estado = 'AP'
     }
     return CabActividadTeleModel.findAll({
-      attributes: [['FECH_INIC', 'fechaInicioPeriodo'], ['FECH_FINA', 'fechaFinPeriodo'],
-        ['NOMB_COMP', 'Nombre']],
+      attributes: [['FECH_INIC', 'FechaInicioPeriodo'], ['FECH_FINA', 'FechaFinPeriodo'],
+        ['NOMB_COMP', 'Nombre'], [col('DESC_ACTI'), 'Descripcion'],
+        [col('PROD_ENTR'), 'ProductoEntregable'], [col('ETAP_ACTI'), 'Etapa'],
+        [col('REFE_ACTI'), 'Referencia'], [col('OBSE_ACTI'), 'Observacion'],
+        [col('DIA_SEMA'), 'FechaActividad'], [col('OBSE_ACTI'), 'Observacion']],
       include: [{
         model: DetaActividadTeleModel,
-        attributes: [['DESC_ACTI','descripcion']],
+        attributes: [],
         required: true
       }],
       where: {
@@ -314,10 +300,10 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
         estadoActividad: estado,
         fechaInicio: { $gte: moment(fechaInicio).toDate() },
         fechaFin: { $lte: moment(fechaFin).toDate() }
-      },
-      raw: true
+      }
     })
   }
+
 
   function findAllDetActividadesAutorizador (actividadId) {
     return DetaActividadTeleModel.findAll({

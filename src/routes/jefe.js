@@ -45,6 +45,7 @@ api.post('/listaActividadesByEmpleado', async (req, res, next) => {
     result = await ActividadTele.findAllActiByEmpleadoByFecha(objeto)
     console.log('jose', result)
     if (result && result.length > 0) {
+      res.send(result)
       // const xlxsFile = jsonToXml(result)
       // const filename = `report${moment().format('YYYYMMDDHHmmss')}.xlsx`
       // const pathFile = fs.writeFileSync(`./temp/${filename}`, xlxsFile, 'binary')
