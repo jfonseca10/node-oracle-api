@@ -281,7 +281,10 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     let estado
     if (estadoActividad === 'RECIBIDA') {
       estado = 'ENVIADA'
-    } else {
+    }
+    if(estadoActividad === 'CREADA'){
+      estado = 'CREADA'
+    }else {
       estado = 'AP'
     }
     return CabActividadTeleModel.findAll({
@@ -293,13 +296,12 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       include: [{
         model: DetaActividadTeleModel,
         attributes: [],
+        diaSemana: { $between: [moment(`${fechaInicio} 00:00`).subtract(5, 'hours').toDate(), moment(`${fechaInicio} 23:59`).subtract(5, 'hours').toDate()] },
         required: true
       }],
       where: {
         rolEmpleado: ROL_EMPL,
-        estadoActividad: estado,
-        fechaInicio: { $gte: moment(`${fechaInicio} 00:00`).subtract(5, 'hours').toDate() },
-        fechaFin: { $lte: moment(`${fechaFin} 23:59`).subtract(5, 'hours').toDate() }
+        estadoActividad: estado
       }
     })
   }
