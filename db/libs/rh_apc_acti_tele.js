@@ -280,7 +280,7 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
     const { ROL_EMPL, estadoActividad, fechaInicio, fechaFin } = model
     let estado
     if (estadoActividad === 'RECIBIDA') {
-      estado = 'ENVIADO'
+      estado = 'ENVIADA'
     } else {
       estado = 'AP'
     }
@@ -298,8 +298,8 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       where: {
         rolEmpleado: ROL_EMPL,
         estadoActividad: estado,
-        fechaInicio: { $gte: moment(fechaInicio).toDate() },
-        fechaFin: { $lte: moment(fechaFin).toDate() }
+        fechaInicio: { $gte: moment(`${fechaInicio} 00:00`).subtract(5, 'hours').toDate() },
+        fechaFin: { $lte: moment(`${fechaFin} 23:59`).subtract(5, 'hours').toDate() }
       }
     })
   }
