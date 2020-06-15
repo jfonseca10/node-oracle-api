@@ -301,8 +301,10 @@ module.exports = function setupCabActividadTele (CabActividadTeleModel, DetaActi
       include: [{
         model: DetaActividadTeleModel,
         attributes: [],
-        diaSemana: { $between: [moment(`${fechaInicio} 00:00`).subtract(5, 'hours').toDate(), moment(`${fechaInicio} 23:59`).subtract(5, 'hours').toDate()] },
-        required: true
+        required: true,
+        where:{
+          diaSemana: { $between: [moment(`${fechaInicio} 00:00`).subtract(5, 'hours').toDate(), moment(`${fechaFin} 23:59`).subtract(5, 'hours').toDate()] }
+        }
       }],
       where: {
         rolEmpleado: ROL_EMPL,
